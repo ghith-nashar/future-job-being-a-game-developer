@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dark Game Store Product Grid</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#111827;
+      --panel-2:#151c2f;
+      --card:#121a2b;
+      --card-border:#27334a;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --chip:#1f2937;
+      --accent:#2563eb;
+      --accent-2:#38bdf8;
+      --success:#22c55e;
+      --warning:#f59e0b;
+      --danger:#ef4444;
+      --shadow:0 20px 50px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      min-height:100vh;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 5%, rgba(37,99,235,.18), transparent 30%),
+        radial-gradient(circle at 90% 12%, rgba(14,165,233,.1), transparent 32%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .hero{
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:24px;
+      background:linear-gradient(135deg, rgba(21,28,47,.96), rgba(11,16,32,.94));
+      padding:24px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+      margin-bottom:18px;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      width:260px;
+      height:260px;
+      border-radius:999px;
+      background:rgba(37,99,235,.18);
+      right:-80px;
+      top:-120px;
+      filter:blur(8px);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .logo{
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      letter-spacing:-.08em;
+      background:linear-gradient(145deg, var(--accent), var(--accent-2));
+      box-shadow:0 12px 30px rgba(37,99,235,.35);
+    }
+
+    h1{
+      font-size:clamp(28px, 4vw, 46px);
+      line-height:1;
+      letter-spacing:-.04em;
+      margin-bottom:8px;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      max-width:620px;
+      font-size:15px;
+    }
+
+    .hero-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:0;
+      color:white;
+      background:linear-gradient(135deg, var(--accent), #1d4ed8);
+      padding:12px 16px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 12px 26px rgba(37,99,235,.26);
+      transition:.2s transform, .2s opacity;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .btn.secondary{
+      background:#0f172a;
+      color:#dbeafe;
+      border:1px solid rgba(148,163,184,.22);
+      box-shadow:none;
+    }
+
+    .toolbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter:blur(16px);
+      background:rgba(11,16,32,.72);
+      border:1px solid rgba(148,163,184,.14);
+      border-radius:22px;
+      padding:14px 16px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:center;
+      margin-bottom:16px;
+    }
+
+    .result-count{
+      font-size:12px;
+      color:var(--muted);
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .result-count strong{
+      display:block;
+      margin-top:6px;
+      font-family:inherit;
+      font-size:18px;
+      color:var(--text);
+    }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .search{
+      width:min(280px, 100%);
+      background:#0f172a;
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:14px;
+      color:white;
+      padding:12px 14px;
+      outline:none;
+    }
+
+    .search:focus,
+    select:focus{
+      border-color:rgba(56,189,248,.65);
+      box-shadow:0 0 0 4px rgba(14,165,233,.12);
+    }
+
+    label{
+      color:#e2e8f0;
+      font-weight:800;
+      font-size:14px;
+    }
+
+    select{
+      background:#0f172a;
+      border:1px solid rgba(148,163,184,.16);
+      border-radius:14px;
+      color:white;
+      padding:12px 42px 12px 12px;
+      outline:none;
+      min-width:170px;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:220px 1fr;
+      gap:16px;
+    }
+
+    .filters{
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(17,24,39,.8);
+      border-radius:22px;
+      padding:16px;
+      height:max-content;
+      position:sticky;
+      top:92px;
+    }
+
+    .filter-title{
+      font-weight:900;
+      margin-bottom:14px;
+    }
+
+    .filter-group{
+      padding:14px 0;
+      border-top:1px solid rgba(148,163,184,.12);
+    }
+
+    .filter-group:first-of-type{
+      border-top:0;
+      padding-top:0;
+    }
+
+    .filter-group p{
+      color:#dbeafe;
+      font-weight:800;
+      font-size:13px;
+      margin-bottom:10px;
+    }
+
+    .check{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      color:var(--muted);
+      margin:9px 0;
+      font-size:14px;
+      cursor:pointer;
+    }
+
+    input[type="checkbox"]{
+      accent-color:var(--accent);
+      width:16px;
+      height:16px;
+    }
+
+    .products-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:16px;
+    }
+
+    .card{
+      min-height:430px;
+      background:linear-gradient(180deg, rgba(18,26,43,.98), rgba(14,20,34,.98));
+      border:1px solid var(--card-border);
+      border-radius:var(--radius);
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      transition:.22s transform, .22s border-color, .22s box-shadow;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card:hover{
+      transform:translateY(-5px);
+      border-color:rgba(59,130,246,.65);
+      box-shadow:0 20px 42px rgba(0,0,0,.35);
+    }
+
+    .cover{
+      height:188px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.24);
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding:14px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+      margin-bottom:16px;
+      background:linear-gradient(135deg, #0f172a, #334155);
+    }
+
+    .cover::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.28), transparent 17%),
+        radial-gradient(circle at 76% 34%, rgba(239,68,68,.28), transparent 19%),
+        linear-gradient(180deg, transparent 0%, rgba(0,0,0,.72) 78%);
+      opacity:.9;
+    }
+
+    .cover::after{
+      content:"";
+      position:absolute;
+      inset:auto 0 0;
+      height:8px;
+      background:linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .cover.ps4::after{
+      background:linear-gradient(90deg, #60a5fa, #2563eb);
+    }
+
+    .cover.used::after{
+      background:linear-gradient(90deg, #f59e0b, #f97316);
+    }
+
+    .cover-title{
+      position:relative;
+      z-index:2;
+      font-weight:1000;
+      font-size:26px;
+      line-height:.94;
+      letter-spacing:-.08em;
+      text-transform:uppercase;
+      text-shadow:0 4px 18px rgba(0,0,0,.65);
+    }
+
+    .cover-title small{
+      display:block;
+      font-size:12px;
+      color:#cbd5e1;
+      letter-spacing:.18em;
+      margin-bottom:8px;
+    }
+
+    .platform{
+      position:absolute;
+      top:10px;
+      left:10px;
+      z-index:3;
+      background:white;
+      color:#0f172a;
+      font-weight:1000;
+      font-size:14px;
+      padding:5px 10px;
+      border-radius:10px;
+      letter-spacing:.05em;
+    }
+
+    .age{
+      position:absolute;
+      left:10px;
+      bottom:14px;
+      z-index:3;
+      width:30px;
+      height:36px;
+      display:grid;
+      place-items:center;
+      background:#ef4444;
+      color:white;
+      font-weight:1000;
+      border-radius:4px;
+      border:2px solid white;
+      font-size:16px;
+    }
+
+    .badge{
+      position:absolute;
+      right:10px;
+      top:10px;
+      z-index:4;
+      background:rgba(15,23,42,.86);
+      border:1px solid rgba(255,255,255,.18);
+      color:#e0f2fe;
+      padding:6px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      backdrop-filter:blur(8px);
+    }
+
+    .title{
+      font-size:18px;
+      line-height:1.35;
+      font-weight:500;
+      min-height:50px;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
+    .publisher{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:8px;
+      margin-bottom:12px;
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:14px;
+    }
+
+    .chip{
+      background:rgba(31,41,55,.95);
+      border:1px solid rgba(148,163,184,.14);
+      color:#d1d5db;
+      font-size:11px;
+      border-radius:999px;
+      padding:6px 9px;
+      font-weight:900;
+      white-space:nowrap;
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .price-row{
+      margin-top:auto;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .price{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color:white;
+    }
+
+    .price span:first-child{
+      font-size:12px;
+      margin-right:6px;
+      color:white;
+    }
+
+    .price strong{
+      font-size:28px;
+      letter-spacing:.05em;
+    }
+
+    .price sup{
+      font-size:13px;
+    }
+
+    .cart{
+      width:42px;
+      height:42px;
+      border-radius:13px;
+      border:1px solid rgba(59,130,246,.42);
+      background:rgba(37,99,235,.15);
+      color:#bfdbfe;
+      display:grid;
+      place-items:center;
+      font-size:19px;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .cart:hover{
+      background:var(--accent);
+      color:white;
+      transform:scale(1.06);
+    }
+
+    .empty{
+      display:none;
+      text-align:center;
+      padding:50px 20px;
+      border:1px dashed rgba(148,163,184,.24);
+      border-radius:22px;
+      color:var(--muted);
+      background:rgba(17,24,39,.45);
+    }
+
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      background:#020617;
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:16px;
+      padding:14px 16px;
+      color:white;
+      box-shadow:var(--shadow);
+      transform:translateY(120px);
+      opacity:0;
+      transition:.25s;
+      z-index:100;
+      max-width:310px;
+    }
+
+    .toast.show{
+      transform:translateY(0);
+      opacity:1;
+    }
+
+    footer{
+      text-align:center;
+      color:var(--muted);
+      padding:28px 0 10px;
+      font-size:13px;
+    }
+
+    @media (max-width:1100px){
+      .products-grid{
+        grid-template-columns:repeat(3, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:850px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+
+      .filters{
+        position:static;
+      }
+
+      .products-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .toolbar{
+        grid-template-columns:1fr;
+      }
+
+      .controls{
+        justify-content:stretch;
+      }
+
+      .search,
+      select{
+        flex:1;
+      }
+    }
+
+    @media (max-width:560px){
+      .page{
+        padding:10px;
+      }
+
+      .hero{
+        padding:18px;
+      }
+
+      .hero-actions,
+      .controls{
+        width:100%;
+      }
+
+      .btn,
+      .search,
+      select{
+        width:100%;
+      }
+
+      .products-grid{
+        grid-template-columns:1fr;
+      }
+
+      .card{
+        min-height:410px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="brand">
+          <div class="logo">GV</div>
+          <div>
+            <h1>GameVault Store</h1>
+            <p class="subtitle">A GitHub-ready dark product catalog inspired by modern game stores. Search, filter, sort, and display clean product cards.</p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn" onclick="scrollToProducts()">Browse Products</button>
+          <button class="btn secondary" onclick="resetFilters()">Reset Filters</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="result-count">
+        Products
+        <strong id="resultCount">0 Results</strong>
+      </div>
+
+      <div class="controls">
+        <input class="search" id="searchInput" type="search" placeholder="Search games..." />
+        <label for="sortSelect">Sort by</label>
+        <select id="sortSelect">
+          <option value="best">Best Match</option>
+          <option value="priceLow">Price: Low to High</option>
+          <option value="priceHigh">Price: High to Low</option>
+          <option value="scoreHigh">Metacritic Score</option>
+          <option value="sizeLow">Smallest Size</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="layout" id="products">
+      <aside class="filters">
+        <div class="filter-title">Filters</div>
+
+        <div class="filter-group">
+          <p>Platform</p>
+          <label class="check"><input type="checkbox" value="PS5" class="platformFilter"> PS5</label>
+          <label class="check"><input type="checkbox" value="PS4" class="platformFilter"> PS4</label>
+        </div>
+
+        <div class="filter-group">
+          <p>Edition</p>
+          <label class="check"><input type="checkbox" value="Gold Edition" class="editionFilter"> Gold Edition</label>
+          <label class="check"><input type="checkbox" value="Standard" class="editionFilter"> Standard</label>
+          <label class="check"><input type="checkbox" value="Used" class="editionFilter"> Used</label>
+        </div>
+
+        <div class="filter-group">
+          <p>Price</p>
+          <label class="check"><input type="checkbox" value="1000" class="priceFilter"> Under EGP 1000</label>
+          <label class="check"><input type="checkbox" value="1500" class="priceFilter"> Under EGP 1500</label>
+          <label class="check"><input type="checkbox" value="2500" class="priceFilter"> Under EGP 2500</label>
+        </div>
+      </aside>
+
+      <div>
+        <div class="products-grid" id="productsGrid"></div>
+        <div class="empty" id="emptyState">
+          <h2>No products found</h2>
+          <p>Try changing your search or clearing the filters.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built as one single index.html file. Replace the product data and cover art with your own real store content.
+    </footer>
+  </main>
+
+  <div class="toast" id="toast">Added to cart</div>
+
+  <script>
+    const products = [
+      {
+        title:"Resident Evil Requiem - PS5",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:89,
+        size:40,
+        price:3599,
+        edition:"Standard",
+        tag:"New Release",
+        cover:"linear-gradient(135deg,#e2e8f0,#64748b 46%,#111827)",
+      },
+      {
+        title:"Resident Evil Requiem - PS5 - Used",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:89,
+        size:40,
+        price:2999,
+        edition:"Used",
+        tag:"Used",
+        cover:"linear-gradient(135deg,#f8fafc,#94a3b8 48%,#0f172a)",
+      },
+      {
+        title:"Resident Evil 4 Remake Gold Edition - Arabic and English",
+        publisher:"Capcom",
+        platform:"PS4",
+        score:93,
+        size:60,
+        price:1799,
+        edition:"Gold Edition",
+        tag:"Gold Edition",
+        cover:"linear-gradient(135deg,#14532d,#78350f 52%,#020617)",
+      },
+      {
+        title:"Resident Evil 4 Remake - Arabic and English - PS4",
+        publisher:"Capcom",
+        platform:"PS4",
+        score:93,
+        size:60,
+        price:1399,
+        edition:"Standard",
+        tag:"Arabic + English",
+        cover:"linear-gradient(135deg,#020617,#334155 55%,#0f172a)",
+      },
+      {
+        title:"Resident Evil 4 Remake - Arabic and English - PS5",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:93,
+        size:60,
+        price:1299,
+        edition:"Standard",
+        tag:"Best Value",
+        cover:"linear-gradient(135deg,#020617,#475569 55%,#172554)",
+      },
+      {
+        title:"Resident Evil 2 Remake - PS4",
+        publisher:"Capcom",
+        platform:"PS4",
+        score:91,
+        size:25,
+        price:1299,
+        edition:"Standard",
+        tag:"Classic",
+        cover:"linear-gradient(135deg,#1e3a8a,#64748b 46%,#7f1d1d)",
+      },
+      {
+        title:"Resident Evil 7 Biohazard Gold Edition - PS5",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:86,
+        size:25,
+        price:1399,
+        edition:"Gold Edition",
+        tag:"Gold Edition",
+        cover:"linear-gradient(135deg,#020617,#1e293b 45%,#334155)",
+      },
+      {
+        title:"Resident Evil Village - Arabic and English Edition - PS5",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:84,
+        size:35,
+        price:1099,
+        edition:"Standard",
+        tag:"Arabic + English",
+        cover:"linear-gradient(135deg,#f8fafc,#64748b 46%,#020617)",
+      },
+      {
+        title:"Resident Evil 3 Remake - PS4",
+        publisher:"Capcom",
+        platform:"PS4",
+        score:79,
+        size:24,
+        price:899,
+        edition:"Standard",
+        tag:"Deal",
+        cover:"linear-gradient(135deg,#7f1d1d,#111827 50%,#020617)",
+      },
+      {
+        title:"Resident Evil Origins Collection - PS4",
+        publisher:"Capcom",
+        platform:"PS4",
+        score:83,
+        size:22,
+        price:999,
+        edition:"Standard",
+        tag:"Collection",
+        cover:"linear-gradient(135deg,#292524,#57534e 47%,#111827)",
+      },
+      {
+        title:"Resident Evil Revelations Collection - PS5",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:82,
+        size:30,
+        price:1199,
+        edition:"Standard",
+        tag:"Collection",
+        cover:"linear-gradient(135deg,#0f172a,#164e63 48%,#020617)",
+      },
+      {
+        title:"Resident Evil Village Gold Edition - PS5",
+        publisher:"Capcom",
+        platform:"PS5",
+        score:84,
+        size:42,
+        price:1599,
+        edition:"Gold Edition",
+        tag:"Gold Edition",
+        cover:"linear-gradient(135deg,#f3f4f6,#6b7280 47%,#111827)",
+      }
+    ];
+
+    const grid = document.getElementById("productsGrid");
+    const resultCount = document.getElementById("resultCount");
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const emptyState = document.getElementById("emptyState");
+    const toast = document.getElementById("toast");
+
+    function getCheckedValues(className){
+      return [...document.querySelectorAll("." + className + ":checked")].map(input => input.value);
+    }
+
+    function renderProducts(){
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedPlatforms = getCheckedValues("platformFilter");
+      const selectedEditions = getCheckedValues("editionFilter");
+      const selectedPrices = getCheckedValues("priceFilter").map(Number);
+
+      let filtered = products.filter(product => {
+        const matchesSearch =
+          product.title.toLowerCase().includes(query) ||
+          product.publisher.toLowerCase().includes(query) ||
+          product.platform.toLowerCase().includes(query) ||
+          product.edition.toLowerCase().includes(query);
+
+        const matchesPlatform = selectedPlatforms.length === 0 || selectedPlatforms.includes(product.platform);
+        const matchesEdition = selectedEditions.length === 0 || selectedEditions.includes(product.edition);
+        const matchesPrice = selectedPrices.length === 0 || selectedPrices.some(max => product.price < max);
+
+        return matchesSearch && matchesPlatform && matchesEdition && matchesPrice;
+      });
+
+      switch(sortSelect.value){
+        case "priceLow":
+          filtered.sort((a,b) => a.price - b.price);
+          break;
+        case "priceHigh":
+          filtered.sort((a,b) => b.price - a.price);
+          break;
+        case "scoreHigh":
+          filtered.sort((a,b) => b.score - a.score);
+          break;
+        case "sizeLow":
+          filtered.sort((a,b) => a.size - b.size);
+          break;
+        default:
+          filtered.sort((a,b) => (b.score - a.score) || (a.price - b.price));
+      }
+
+      resultCount.textContent = `${filtered.length} Results`;
+      emptyState.style.display = filtered.length ? "none" : "block";
+
+      grid.innerHTML = filtered.map(product => `
+        <article class="card">
+          <div class="cover ${product.platform.toLowerCase()} ${product.edition === "Used" ? "used" : ""}" style="background:${product.cover}">
+            <div class="platform">${product.platform}</div>
+            <div class="badge">${product.tag}</div>
+            <div class="age">18</div>
+            <div class="cover-title">
+              <small>${product.edition}</small>
+              ${shortCoverTitle(product.title)}
+            </div>
+          </div>
+
+          <h2 class="title" title="${product.title}">${product.title}</h2>
+          <p class="publisher">By ${product.publisher}</p>
+
+          <div class="chips">
+            <span class="chip">Metacritic Score: ${product.score}/100</span>
+            <span class="chip">Base Game Size: ${product.size} GB</span>
+            <span class="chip">${product.edition}</span>
+          </div>
+
+          <div class="price-row">
+            <p class="price"><span>EGP</span><strong>${product.price}</strong><sup>00</sup></p>
+            <button class="cart" aria-label="Add ${product.title} to cart" onclick="addToCart('${escapeQuotes(product.title)}')">🛒</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function shortCoverTitle(title){
+      const clean = title
+        .replace("Resident Evil", "Resident<br>Evil")
+        .replace("Arabic and English", "")
+        .replace("Gold Edition", "Gold")
+        .replace("- PS5", "")
+        .replace("- PS4", "")
+        .replace("- Used", "");
+      return clean;
+    }
+
+    function escapeQuotes(text){
+      return text.replaceAll("'", "\\'");
+    }
+
+    function addToCart(title){
+      toast.textContent = `${title} added to cart`;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1900);
+    }
+
+    function resetFilters(){
+      searchInput.value = "";
+      sortSelect.value = "best";
+      document.querySelectorAll("input[type='checkbox']").forEach(input => input.checked = false);
+      renderProducts();
+    }
+
+    function scrollToProducts(){
+      document.getElementById("products").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    searchInput.addEventListener("input", renderProducts);
+    sortSelect.addEventListener("change", renderProducts);
+    document.querySelectorAll("input[type='checkbox']").forEach(input => {
+      input.addEventListener("change", renderProducts);
+    });
+
+    renderProducts();
+  </script>
+</body>
+</html>
